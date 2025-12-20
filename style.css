@@ -1,0 +1,702 @@
+/* =============================================
+   Quote Generator - Modern CSS Styles
+   ============================================= */
+
+/* CSS Variables */
+:root {
+    /* Primary Colors - User's Color Palette */
+    --color-primary: #FF0000;
+    --color-primary-dark: #AF0404;
+    --color-bg-dark: #252525;
+    --color-bg-medium: #414141;
+    --color-bg-light: #1a1a1a;
+    
+    /* Text Colors */
+    --color-text-primary: #ffffff;
+    --color-text-secondary: rgba(255, 255, 255, 0.7);
+    --color-text-muted: rgba(255, 255, 255, 0.5);
+    
+    /* Accent Colors for Dynamic Themes */
+    --color-accent-1: #FF0000;
+    --color-accent-2: #AF0404;
+    --color-accent-3: #e74c3c;
+    --color-accent-4: #c0392b;
+    --color-accent-5: #d35400;
+    --color-accent-6: #e67e22;
+    
+    /* Skeleton Colors */
+    --skeleton-base: rgba(255, 255, 255, 0.1);
+    --skeleton-shine: rgba(255, 255, 255, 0.2);
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-medium: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Shadows */
+    --shadow-card: 0 25px 80px rgba(0, 0, 0, 0.5);
+    --shadow-btn: 0 4px 15px rgba(175, 4, 4, 0.4);
+    --shadow-btn-hover: 0 8px 25px rgba(175, 4, 4, 0.6);
+    
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-full: 50%;
+    
+    /* Fonts */
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Reset & Base Styles */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    overflow-x: hidden;
+    transition: background-color var(--transition-slow);
+}
+
+/* Background Pattern */
+.background-pattern {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 80%, rgba(175, 4, 4, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 0, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(65, 65, 65, 0.3) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity var(--transition-slow);
+}
+
+/* Main Container */
+.container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* Quote Card */
+.quote-card {
+    width: 100%;
+    background: linear-gradient(145deg, var(--color-bg-medium), var(--color-bg-dark));
+    border-radius: var(--radius-lg);
+    padding: 3rem;
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+    overflow: hidden;
+    animation: cardFadeIn 0.6s ease-out;
+}
+
+.quote-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
+    transition: background var(--transition-slow);
+}
+
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Quote Header */
+.quote-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.quote-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--color-text-primary);
+    transition: transform var(--transition-medium), background var(--transition-slow);
+}
+
+.quote-icon:hover {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.quote-title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--color-text-primary);
+}
+
+/* Quote Content */
+.quote-content {
+    margin-bottom: 2.5rem;
+}
+
+.quote-text {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--color-text-primary);
+    margin-bottom: 1.5rem;
+    position: relative;
+    min-height: 100px;
+    transition: opacity var(--transition-medium);
+}
+
+.quote-text.loading {
+    opacity: 0.5;
+}
+
+/* Quote Author */
+.quote-author {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 500;
+    font-style: normal;
+    color: var(--color-primary);
+    transition: color var(--transition-slow);
+}
+
+.author-line {
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-primary), transparent);
+    transition: background var(--transition-slow);
+}
+
+.author-name {
+    min-width: 150px;
+}
+
+/* Skeleton Loading Styles */
+.skeleton {
+    background: var(--skeleton-base);
+    border-radius: var(--radius-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--skeleton-shine),
+        transparent
+    );
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+.skeleton-text {
+    height: 1.75rem;
+    width: 100%;
+    margin-bottom: 0.75rem;
+}
+
+.skeleton-text.skeleton-short {
+    width: 70%;
+}
+
+.skeleton-author {
+    height: 1.1rem;
+    width: 120px;
+}
+
+.skeleton.hidden {
+    display: none;
+}
+
+/* Quote Actions */
+.quote-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.action-group {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Action Buttons (Icon Buttons) */
+.action-btn {
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-medium);
+    position: relative;
+    overflow: hidden;
+}
+
+.action-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: var(--color-primary);
+    border-radius: var(--radius-full);
+    transform: translate(-50%, -50%);
+    transition: all var(--transition-medium);
+    z-index: -1;
+}
+
+.action-btn:hover {
+    color: var(--color-text-primary);
+    transform: translateY(-3px);
+}
+
+.action-btn:hover::before {
+    width: 100%;
+    height: 100%;
+}
+
+.action-btn:active {
+    transform: translateY(-1px) scale(0.95);
+}
+
+.action-btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+}
+
+/* X (Twitter) Button Specific */
+#btn-twitter:hover::before {
+    background: #000000;
+}
+
+/* Copy Button Success State */
+.action-btn.copied {
+    color: var(--color-text-primary);
+}
+
+.action-btn.copied::before {
+    width: 100%;
+    height: 100%;
+    background: #27ae60;
+}
+
+/* Speaking State */
+.action-btn.speaking {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Primary Button */
+.btn-primary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow-btn);
+    transition: all var(--transition-medium);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: left var(--transition-slow);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-btn-hover);
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+.btn-primary:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 3px;
+}
+
+.btn-primary i {
+    transition: transform var(--transition-medium);
+}
+
+.btn-primary:hover i {
+    transform: rotate(180deg);
+}
+
+.btn-primary.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-primary.loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Language Toggle */
+.language-toggle {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 4rem;
+}
+
+.lang-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-muted);
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.lang-btn:hover {
+    color: var(--color-text-secondary);
+}
+
+.lang-btn.active {
+    background: var(--color-primary);
+    color: var(--color-text-primary);
+}
+
+.lang-btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Toast Notification */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background: var(--color-bg-medium);
+    border: 1px solid rgba(39, 174, 96, 0.3);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-medium);
+    z-index: 1000;
+}
+
+.toast i {
+    color: #27ae60;
+    font-size: 1.2rem;
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Site Footer */
+.site-footer {
+    position: fixed;
+    bottom: 2rem;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    z-index: 5;
+}
+
+.site-footer a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.site-footer a:hover {
+    color: var(--color-text-primary);
+    text-decoration: underline;
+}
+
+/* Signature Footer */
+.sign {
+    position: fixed;
+    bottom: 0.5rem;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    font-family: var(--font-body);
+    letter-spacing: 0.5px;
+    z-index: 5;
+}
+
+.sign a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.sign a:hover {
+    color: var(--color-text-primary);
+}
+
+/* Quote Text Animation */
+.quote-text.fade-in {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.quote-author.fade-in {
+    animation: fadeInUp 0.5s ease-out 0.15s both;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    body {
+        padding: 1.5rem;
+    }
+    
+    .quote-card {
+        padding: 2rem;
+    }
+    
+    .quote-text {
+        font-size: 1.4rem;
+    }
+    
+    .quote-title {
+        font-size: 1.25rem;
+    }
+    
+    .quote-actions {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .action-group-left {
+        order: 2;
+    }
+    
+    .action-group-right {
+        order: 1;
+        width: 100%;
+    }
+    
+    .btn-primary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .quote-card {
+        padding: 1.5rem;
+        border-radius: var(--radius-md);
+    }
+    
+    .quote-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .quote-text {
+        font-size: 1.25rem;
+        text-align: center;
+    }
+    
+    .quote-author {
+        justify-content: center;
+    }
+    
+    .action-group-left {
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .site-footer {
+        position: relative;
+        margin-top: 3rem;
+    }
+    
+    .sign {
+        position: relative;
+        margin-top: 0.75rem;
+        padding-bottom: 1rem;
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .quote-card {
+        border: 2px solid var(--color-text-primary);
+    }
+    
+    .action-btn {
+        border: 1px solid var(--color-text-secondary);
+    }
+    
+    .btn-primary {
+        border: 2px solid var(--color-text-primary);
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .skeleton::after {
+        animation: none;
+    }
+}
+
+/* Focus Visible for Keyboard Navigation */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Selection Styling */
+::selection {
+    background: var(--color-primary);
+    color: var(--color-text-primary);
+}
+

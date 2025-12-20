@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Random Quote Generator - Get inspired with random quotes from famous people"
+    />
+    <meta
+      name="keywords"
+      content="quotes, inspiration, motivation, random quotes"
+    />
+    <meta name="author" content="Quote Generator" />
+    <title data-en="Quote Generator" data-tr="Alinti Uretici">
+      Quote Generator
+    </title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Background Pattern -->
+    <div class="background-pattern" aria-hidden="true"></div>
+
+    <!-- Main Container -->
+    <main class="container" role="main">
+      <!-- Quote Card -->
+      <article
+        class="quote-card"
+        aria-labelledby="quote-text"
+        aria-describedby="quote-author"
+      >
+        <!-- Header -->
+        <header class="quote-header">
+          <div class="quote-icon" aria-hidden="true">
+            <i class="fas fa-quote-left"></i>
+          </div>
+          <h1
+            class="quote-title"
+            data-en="Daily Inspiration"
+            data-tr="Gunluk Ilham"
+          >
+            Daily Inspiration
+          </h1>
+        </header>
+
+        <!-- Quote Content -->
+        <section class="quote-content">
+          <!-- Quote Text -->
+          <blockquote id="quote-text" class="quote-text" aria-live="polite">
+            <!-- Skeleton Loading -->
+            <div class="skeleton skeleton-text" aria-hidden="true"></div>
+            <div
+              class="skeleton skeleton-text skeleton-short"
+              aria-hidden="true"
+            ></div>
+          </blockquote>
+
+          <!-- Quote Author -->
+          <cite id="quote-author" class="quote-author">
+            <span class="author-line" aria-hidden="true"></span>
+            <span class="author-name">
+              <div class="skeleton skeleton-author" aria-hidden="true"></div>
+            </span>
+          </cite>
+        </section>
+
+        <!-- Action Buttons -->
+        <footer class="quote-actions">
+          <div class="action-group action-group-left">
+            <!-- X (Twitter) Share -->
+            <button
+              id="btn-twitter"
+              class="action-btn"
+              aria-label="Share on X"
+              data-en="Share on X"
+              data-tr="X'te Paylas"
+              title="Share on X"
+            >
+              <i class="fab fa-x-twitter" aria-hidden="true"></i>
+            </button>
+
+            <!-- Copy to Clipboard -->
+            <button
+              id="btn-copy"
+              class="action-btn"
+              aria-label="Copy to Clipboard"
+              data-en="Copy to Clipboard"
+              data-tr="Panoya Kopyala"
+              title="Copy to Clipboard"
+            >
+              <i class="fas fa-copy" aria-hidden="true"></i>
+            </button>
+
+            <!-- Text to Speech -->
+            <button
+              id="btn-speak"
+              class="action-btn"
+              aria-label="Listen to Quote"
+              data-en="Listen to Quote"
+              data-tr="Alintiyi Dinle"
+              title="Listen to Quote"
+            >
+              <i class="fas fa-volume-up" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <div class="action-group action-group-right">
+            <!-- New Quote Button -->
+            <button
+              id="btn-new-quote"
+              class="btn-primary"
+              aria-label="Get New Quote"
+              data-en="New Quote"
+              data-tr="Yeni Alinti"
+            >
+              <span class="btn-text" data-en="New Quote" data-tr="Yeni Alinti"
+                >New Quote</span
+              >
+              <i class="fas fa-sync-alt" aria-hidden="true"></i>
+            </button>
+          </div>
+        </footer>
+      </article>
+
+      <!-- Language Toggle -->
+      <nav class="language-toggle" aria-label="Language Selection">
+        <button
+          id="btn-lang-en"
+          class="lang-btn active"
+          aria-pressed="true"
+          aria-label="Switch to English"
+        >
+          EN
+        </button>
+        <button
+          id="btn-lang-tr"
+          class="lang-btn"
+          aria-pressed="false"
+          aria-label="Switch to Turkish"
+        >
+          TR
+        </button>
+      </nav>
+
+      <!-- Toast Notification -->
+      <div
+        id="toast"
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <i class="fas fa-check-circle" aria-hidden="true"></i>
+        <span
+          id="toast-message"
+          data-en="Copied to clipboard!"
+          data-tr="Panoya kopyalandi!"
+          >Copied to clipboard!</span
+        >
+      </div>
+    </main>
+
+    <!-- API Attribution Footer -->
+    <footer class="site-footer">
+      <p>
+        <span
+          data-en="Inspirational quotes provided by"
+          data-tr="Ilham verici alintilar"
+          >Inspirational quotes provided by</span
+        >
+        <a
+          href="https://zenquotes.io/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >ZenQuotes API</a
+        >
+      </p>
+    </footer>
+
+    <!-- Signature Footer -->
+    <footer class="sign">
+      Created by
+      <a
+        href="https://serkanbayraktar.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Serkanby</a
+      >
+      |
+      <a
+        href="https://github.com/Serkanbyx"
+        target="_blank"
+        rel="noopener noreferrer"
+        >Github</a
+      >
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+  </body>
+</html>
