@@ -48,6 +48,15 @@ const CONFIG = {
     // Documentation: https://mymemory.translated.net/doc/spec.php
     translateApiUrl: 'https://api.mymemory.translated.net/get',
     
+    // Fallback quotes JSON file path
+    fallbackQuotesUrl: './quotes.json',
+    
+    // localStorage key for cached quotes
+    cacheKey: 'cachedQuotes',
+    
+    // Maximum number of quotes to cache in localStorage
+    maxCacheSize: 100,
+    
     // Maximum wait time for API request (milliseconds)
     apiTimeout: 10000,
     
@@ -100,6 +109,145 @@ const elements = {
 };
 
 // =============================================
+// Cache & Fallback Functions
+// =============================================
+
+/**
+ * Saves a quote to localStorage cache
+ * Prevents duplicates and respects maxCacheSize limit
+ * 
+ * @param {Object} quote - Quote object with text and author
+ */
+function saveQuoteToCache(quote) {
+    try {
+        const cachedQuotes = getCachedQuotes();
+        
+        // Check for duplicates (by quote text)
+        const isDuplicate = cachedQuotes.some(
+            cached => cached.text === quote.text
+        );
+        
+        if (!isDuplicate) {
+            cachedQuotes.push(quote);
+            
+            // Limit cache size - remove oldest quotes if exceeds limit
+            while (cachedQuotes.length > CONFIG.maxCacheSize) {
+                cachedQuotes.shift();
+            }
+            
+            localStorage.setItem(CONFIG.cacheKey, JSON.stringify(cachedQuotes));
+            console.log(`Quote cached. Total cached: ${cachedQuotes.length}`);
+        }
+    } catch (error) {
+        console.warn('Failed to cache quote:', error.message);
+    }
+}
+
+/**
+ * Retrieves all cached quotes from localStorage
+ * 
+ * @returns {Array} - Array of cached quote objects
+ */
+function getCachedQuotes() {
+    try {
+        const cached = localStorage.getItem(CONFIG.cacheKey);
+        return cached ? JSON.parse(cached) : [];
+    } catch (error) {
+        console.warn('Failed to read cache:', error.message);
+        return [];
+    }
+}
+
+/**
+ * Gets a random quote from localStorage cache
+ * 
+ * @returns {Object|null} - Random quote object or null if cache is empty
+ */
+function getRandomCachedQuote() {
+    const cachedQuotes = getCachedQuotes();
+    
+    if (cachedQuotes.length === 0) {
+        return null;
+    }
+    
+    const randomIndex = Math.floor(Math.random() * cachedQuotes.length);
+    return cachedQuotes[randomIndex];
+}
+
+/**
+ * Fetches fallback quotes from quotes.json file
+ * Used when API fails and localStorage cache is empty
+ * 
+ * @returns {Promise<Array>} - Array of quote objects
+ */
+async function fetchFallbackQuotes() {
+    try {
+        const response = await fetch(CONFIG.fallbackQuotesUrl);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to load fallback quotes: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data.quotes || [];
+        
+    } catch (error) {
+        console.error('Failed to fetch fallback quotes:', error.message);
+        return [];
+    }
+}
+
+/**
+ * Gets a random quote from fallback JSON file
+ * 
+ * @returns {Promise<Object|null>} - Random quote object or null
+ */
+async function getRandomFallbackQuote() {
+    const fallbackQuotes = await fetchFallbackQuotes();
+    
+    if (fallbackQuotes.length === 0) {
+        return null;
+    }
+    
+    const randomIndex = Math.floor(Math.random() * fallbackQuotes.length);
+    const quote = fallbackQuotes[randomIndex];
+    
+    // Convert from JSON format (q, a) to app format (text, author)
+    return {
+        text: quote.q,
+        author: quote.a
+    };
+}
+
+/**
+ * Gets a quote from fallback sources (cache or JSON file)
+ * Priority: 1. localStorage cache, 2. quotes.json file
+ * 
+ * @returns {Promise<Object|null>} - Quote object or null if all sources fail
+ */
+async function getQuoteFromFallback() {
+    // Try localStorage cache first
+    const cachedQuote = getRandomCachedQuote();
+    
+    if (cachedQuote) {
+        console.log('Using cached quote from localStorage');
+        return cachedQuote;
+    }
+    
+    // Try fallback JSON file
+    console.log('Cache empty, trying fallback JSON file...');
+    const fallbackQuote = await getRandomFallbackQuote();
+    
+    if (fallbackQuote) {
+        console.log('Using quote from fallback JSON file');
+        return fallbackQuote;
+    }
+    
+    // All sources failed
+    return null;
+}
+
+// =============================================
 // API Functions
 // =============================================
 
@@ -127,6 +275,12 @@ async function tryFetchWithProxy(proxyUrl) {
         
         const data = await response.json();
         const quote = data[0];
+        
+        // Check for API rate limit error message
+        // ZenQuotes returns this as a "quote" when rate limited
+        if (quote.q && quote.q.toLowerCase().includes('too many requests')) {
+            throw new Error('API rate limit exceeded');
+        }
         
         // Clean author name
         // Sometimes API returns "zenquotes.io" or empty value
@@ -236,6 +390,11 @@ async function translateText(text, fromLang, toLang) {
  * - await: Waits for Promise to resolve
  * - try/catch: Catches errors
  * 
+ * FALLBACK MECHANISM:
+ * - First tries to fetch from API
+ * - On success: saves quote to localStorage cache
+ * - On failure: uses cached quotes or fallback JSON file
+ * 
  * TRANSLATION FEATURE:
  * - If Turkish is selected, quote is automatically translated
  * - Uses MyMemory API
@@ -247,10 +406,27 @@ async function getQuote() {
     // Start loading state
     setLoadingState(true);
     
+    let quote = null;
+    let isFromFallback = false;
+    
     try {
-        // Fetch quote from API (English)
-        const quote = await fetchQuoteFromApi();
+        // Try to fetch quote from API (English)
+        quote = await fetchQuoteFromApi();
         
+        // Save to cache for future fallback use
+        saveQuoteToCache(quote);
+        
+    } catch (error) {
+        // API failed - try fallback sources
+        console.warn('API Error:', error.message);
+        console.log('Attempting to use fallback quotes...');
+        
+        quote = await getQuoteFromFallback();
+        isFromFallback = true;
+    }
+    
+    // Process and display quote
+    if (quote) {
         let displayText = quote.text;
         
         // Translate if Turkish is selected
@@ -263,16 +439,20 @@ async function getQuote() {
         // Display quote on screen
         displayQuote(displayText, quote.author);
         
-    } catch (error) {
-        // Show error message to user
-        console.error('API Error:', error.message);
-        displayError();
+        // Show info if using fallback
+        if (isFromFallback) {
+            console.log('Quote served from fallback source');
+        }
         
-    } finally {
-        // Always close loading state and change theme
-        setLoadingState(false);
-        changeTheme();
+    } else {
+        // All sources failed
+        console.error('All quote sources failed');
+        displayError();
     }
+    
+    // Always close loading state and change theme
+    setLoadingState(false);
+    changeTheme();
 }
 
 // =============================================
