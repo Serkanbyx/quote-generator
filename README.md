@@ -1,23 +1,25 @@
 # 💬 Quote Generator
 
-A modern, accessible random quote generator with dynamic themes, real-time translation, speech synthesis, and social sharing capabilities. Get inspired with quotes from influential figures throughout history!
+A modern, accessible random quote generator with dynamic themes, real-time translation, speech synthesis, dark/light mode, and favorite quotes functionality. Get inspired with quotes from influential figures throughout history!
 
 [![Created by Serkanby](https://img.shields.io/badge/Created%20by-Serkanby-blue?style=flat-square)](https://serkanbayraktar.com/)
 [![GitHub](https://img.shields.io/badge/GitHub-Serkanbyx-181717?style=flat-square&logo=github)](https://github.com/Serkanbyx)
 
 ## Features
 
-- **Random Quotes**: Fetches inspiring quotes from ZenQuotes API with over 1500+ quotes
+- **Random Quotes**: Fetches inspiring quotes from ZenQuotes API with over 1500+ quotes available
 - **Real-Time Translation**: Automatic translation to Turkish using MyMemory Translation API
-- **Text-to-Speech**: Listen to quotes with Web Speech API integration
+- **Text-to-Speech**: Listen to quotes with Web Speech API integration and language detection
 - **Dynamic Themes**: Random color palette changes with smooth transitions on each new quote
-- **Social Sharing**: One-click sharing to X (Twitter)
-- **Clipboard Copy**: Copy quotes instantly with Clipboard API
-- **Skeleton Loading**: Modern loading states for better UX
-- **Multi-Language UI**: English and Turkish interface support
-- **Keyboard Shortcuts**: Quick actions with keyboard navigation
-- **Fully Responsive**: Works perfectly on all devices
-- **Accessible**: ARIA labels, screen reader support, reduced motion support
+- **Dark/Light Mode**: Toggle between dark and light themes with system preference detection
+- **Favorite Quotes**: Save your favorite quotes to localStorage with a beautiful slide-in panel
+- **Social Sharing**: One-click sharing to X (Twitter) with pre-formatted quote text
+- **Clipboard Copy**: Copy quotes instantly with modern Clipboard API and visual feedback
+- **Skeleton Loading**: Modern loading states with shimmer animation for better UX
+- **Multi-Language UI**: Complete English and Turkish interface support
+- **Keyboard Shortcuts**: Quick actions with keyboard navigation for power users
+- **Fully Responsive**: Works perfectly on all devices from mobile to desktop
+- **Accessible**: ARIA labels, screen reader support, high contrast mode, and reduced motion support
 
 ## Live Demo
 
@@ -25,15 +27,16 @@ A modern, accessible random quote generator with dynamic themes, real-time trans
 
 ## Technologies
 
-- **HTML5**: Semantic markup with ARIA attributes for accessibility
-- **CSS3**: Custom properties, Flexbox, Grid, smooth animations and transitions
-- **Vanilla JavaScript (ES6+)**: Async/await, Fetch API, modular code structure
-- **ZenQuotes API**: Source for inspirational quotes
-- **MyMemory Translation API**: Real-time quote translation
-- **Web Speech API**: Text-to-speech functionality
-- **Clipboard API**: Modern clipboard access
-- **Font Awesome 6**: Beautiful icons
-- **Google Fonts**: Playfair Display & Source Sans 3
+- **HTML5**: Semantic markup with ARIA attributes for maximum accessibility
+- **CSS3**: Custom properties, Flexbox, Grid, smooth animations, and dark/light theme support
+- **Vanilla JavaScript (ES6+)**: Async/await, Fetch API, modular code structure, no dependencies
+- **ZenQuotes API**: Source for inspirational quotes with 1500+ quotes database
+- **MyMemory Translation API**: Real-time quote translation with 5000 words/day free tier
+- **Web Speech API**: Text-to-speech functionality with language detection
+- **Clipboard API**: Modern clipboard access with fallback for older browsers
+- **LocalStorage API**: Persistent storage for favorites, theme preference, and quote cache
+- **Font Awesome 6**: Beautiful, accessible icons
+- **Google Fonts**: Playfair Display (headings) & Source Sans 3 (body text)
 
 ## Installation
 
@@ -72,26 +75,32 @@ A modern, accessible random quote generator with dynamic themes, real-time trans
 
 ## Usage
 
-1. **Get a Quote**: Click the "New Quote" button or press `Space`/`Enter`
-2. **Change Language**: Click `EN` or `TR` buttons to switch language
-3. **Listen**: Click the speaker icon to hear the quote read aloud
-4. **Copy**: Click the copy icon to copy the quote to clipboard
-5. **Share**: Click the X icon to share on X (Twitter)
+1. **Get a Quote**: Click the "New Quote" button or press `Space`/`Enter` key
+2. **Change Language**: Click `EN` or `TR` buttons to switch interface and quote language
+3. **Listen**: Click the speaker icon or press `S` to hear the quote read aloud
+4. **Copy**: Click the copy icon or press `C` to copy the quote to clipboard
+5. **Share**: Click the X icon or press `T` to share on X (Twitter)
+6. **Favorite**: Click the heart icon or press `F` to save the quote to favorites
+7. **Toggle Theme**: Click the moon/sun icon or press `D` to switch dark/light mode
+8. **View Favorites**: Click the heart button with badge to open favorites panel
 
 ### Keyboard Shortcuts
 
-| Key               | Action            |
-| ----------------- | ----------------- |
-| `Space` / `Enter` | Get new quote     |
-| `C`               | Copy to clipboard |
-| `T`               | Share on X        |
-| `S`               | Toggle speech     |
+| Key               | Action                 |
+| ----------------- | ---------------------- |
+| `Space` / `Enter` | Get new quote          |
+| `C`               | Copy to clipboard      |
+| `T`               | Share on X (Twitter)   |
+| `S`               | Toggle speech          |
+| `F`               | Toggle favorite        |
+| `D`               | Toggle dark/light mode |
+| `Escape`          | Close favorites panel  |
 
 ## How It Works?
 
 ### API Integration
 
-The application fetches quotes from ZenQuotes API through a CORS proxy:
+The application fetches quotes from ZenQuotes API through CORS proxies (since free tier doesn't support CORS):
 
 ```javascript
 const CONFIG = {
@@ -101,6 +110,28 @@ const CONFIG = {
     "https://thingproxy.freeboard.io/fetch/",
   ],
 };
+```
+
+### Fallback System
+
+The app uses a 3-tier fallback system for reliability:
+
+1. **Primary**: Fetch from ZenQuotes API via CORS proxy
+2. **Secondary**: Use cached quotes from localStorage
+3. **Tertiary**: Load quotes from local `quotes.json` file
+
+```javascript
+async function getQuoteFromFallback() {
+  // Try localStorage cache first
+  const cachedQuote = getRandomCachedQuote();
+  if (cachedQuote) return cachedQuote;
+
+  // Try fallback JSON file
+  const fallbackQuote = await getRandomFallbackQuote();
+  if (fallbackQuote) return fallbackQuote;
+
+  return null;
+}
 ```
 
 ### Translation System
@@ -120,7 +151,7 @@ async function translateText(text, fromLang, toLang) {
 
 ### Dynamic Theme System
 
-Colors change randomly with each new quote:
+Colors change randomly with each new quote using CSS custom properties:
 
 ```javascript
 const COLOR_PALETTES = [
@@ -137,6 +168,56 @@ function changeTheme() {
     "--color-primary",
     palette.primary
   );
+  document.documentElement.style.setProperty(
+    "--color-primary-dark",
+    palette.dark
+  );
+}
+```
+
+### Dark/Light Mode
+
+Theme preference is detected from system and persisted to localStorage:
+
+```javascript
+function loadTheme() {
+  const savedTheme = localStorage.getItem("theme");
+
+  if (!savedTheme) {
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+    state.currentTheme = prefersDark ? "dark" : "light";
+  } else {
+    state.currentTheme = savedTheme;
+  }
+
+  applyTheme();
+}
+```
+
+### Favorites System
+
+Favorites are stored in localStorage with full CRUD operations:
+
+```javascript
+function toggleFavorite() {
+  const currentQuote = {
+    text: state.currentQuote,
+    author: state.currentAuthor,
+    addedAt: new Date().toISOString(),
+  };
+
+  const index = state.favorites.findIndex((q) => q.text === currentQuote.text);
+
+  if (index === -1) {
+    state.favorites.unshift(currentQuote);
+  } else {
+    state.favorites.splice(index, 1);
+  }
+
+  saveFavorites();
+  updateFavoriteButton();
 }
 ```
 
@@ -149,6 +230,8 @@ Edit the `COLOR_PALETTES` array in `script.js`:
 ```javascript
 const COLOR_PALETTES = [
   { primary: "#your-color", dark: "#your-dark-color" },
+  { primary: "#3498db", dark: "#2980b9" }, // Blue theme
+  { primary: "#9b59b6", dark: "#8e44ad" }, // Purple theme
   // Add more palettes...
 ];
 ```
@@ -159,7 +242,7 @@ Modify the timeout value in `CONFIG`:
 
 ```javascript
 const CONFIG = {
-  apiTimeout: 10000, // 10 seconds
+  apiTimeout: 10000, // 10 seconds (default)
   // ...
 };
 ```
@@ -176,6 +259,19 @@ const CONFIG = {
 };
 ```
 
+### Customize Light Mode Colors
+
+Edit the CSS variables in `style.css`:
+
+```css
+:root[data-theme="light"] {
+  --color-bg-dark: #f8f9fa;
+  --color-bg-medium: #ffffff;
+  --color-text-primary: #1a1a1a;
+  /* ... more variables */
+}
+```
+
 ## Features in Detail
 
 ### Completed Features
@@ -190,25 +286,38 @@ const CONFIG = {
 - ✅ Skeleton loading states
 - ✅ Keyboard shortcuts
 - ✅ Responsive design
-- ✅ Accessibility features
+- ✅ Accessibility features (ARIA, reduced motion)
+- ✅ Save favorite quotes to localStorage
+- ✅ Dark/Light mode toggle with system preference
+- ✅ SEO optimizations (Open Graph, Twitter Cards, Favicon)
+- ✅ Favorites panel with copy, share, delete actions
 
 ### Future Features
 
-- [ ] Save favorite quotes to localStorage
 - [ ] Quote categories/tags filter
-- [ ] More language options
+- [ ] More language options (Spanish, German, French)
 - [ ] Quote of the day notification
-- [ ] Dark/Light mode toggle
-- [ ] Share to more platforms (WhatsApp, LinkedIn)
+- [ ] Share to more platforms (WhatsApp, LinkedIn, Facebook)
+- [ ] Export favorites as JSON/PDF
+- [ ] Quote search functionality
+- [ ] PWA support for offline usage
 
 ## Project Structure
 
 ```
 quote-generator/
-├── index.html          # Semantic HTML with accessibility
-├── style.css           # Modern CSS with custom properties
+├── index.html          # Semantic HTML with accessibility features
+├── style.css           # Modern CSS with custom properties & themes
 ├── script.js           # ES6+ JavaScript with API integration
-└── README.md           # Project documentation
+├── quotes.json         # Fallback quotes database (50 quotes)
+├── favicon.svg         # SVG favicon with gradient
+├── README.md           # Project documentation
+├── LICENSE             # MIT License
+├── CONTRIBUTING.md     # Contribution guidelines
+├── CODE_OF_CONDUCT.md  # Code of conduct
+├── SECURITY.md         # Security policy
+└── .github/
+    └── ISSUE_TEMPLATE/ # GitHub issue templates
 ```
 
 ## Contributing
@@ -257,7 +366,8 @@ This project is open source and available under the [MIT License](LICENSE).
 - [ZenQuotes API](https://zenquotes.io/) - Inspirational quotes source
 - [MyMemory Translation API](https://mymemory.translated.net/) - Translation service
 - [Font Awesome](https://fontawesome.com/) - Icons
-- [Google Fonts](https://fonts.google.com/) - Typography
+- [Google Fonts](https://fonts.google.com/) - Typography (Playfair Display, Source Sans 3)
+- [Shields.io](https://shields.io/) - Badges
 
 ## Contact
 

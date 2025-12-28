@@ -11,7 +11,30 @@
       name="keywords"
       content="quotes, inspiration, motivation, random quotes"
     />
-    <meta name="author" content="Quote Generator" />
+    <meta name="author" content="Serkanby" />
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Quote Generator - Daily Inspiration" />
+    <meta property="og:description" content="Get inspired with random quotes from famous people. Features translation, text-to-speech, and beautiful themes." />
+    <meta property="og:image" content="https://serkanbyx.github.io/quote-generator/og-image.png" />
+    <meta property="og:url" content="https://serkanbyx.github.io/quote-generator/" />
+    <meta property="og:site_name" content="Quote Generator" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Quote Generator - Daily Inspiration" />
+    <meta name="twitter:description" content="Get inspired with random quotes from famous people" />
+    <meta name="twitter:image" content="https://serkanbyx.github.io/quote-generator/og-image.png" />
+    <meta name="twitter:creator" content="@serkanbyx" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="apple-touch-icon" href="favicon.svg" />
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#252525" />
+    
     <title data-en="Quote Generator" data-tr="Alinti Uretici">
       Quote Generator
     </title>
@@ -121,6 +144,18 @@
             >
               <i class="fas fa-volume-up" aria-hidden="true"></i>
             </button>
+
+            <!-- Favorite -->
+            <button
+              id="btn-favorite"
+              class="action-btn"
+              aria-label="Add to Favorites"
+              data-en="Add to Favorites"
+              data-tr="Favorilere Ekle"
+              title="Add to Favorites"
+            >
+              <i class="far fa-heart" aria-hidden="true"></i>
+            </button>
           </div>
 
           <div class="action-group action-group-right">
@@ -141,25 +176,72 @@
         </footer>
       </article>
 
-      <!-- Language Toggle -->
-      <nav class="language-toggle" aria-label="Language Selection">
+      <!-- Controls Row -->
+      <div class="controls-row">
+        <!-- Language Toggle -->
+        <nav class="language-toggle" aria-label="Language Selection">
+          <button
+            id="btn-lang-en"
+            class="lang-btn active"
+            aria-pressed="true"
+            aria-label="Switch to English"
+          >
+            EN
+          </button>
+          <button
+            id="btn-lang-tr"
+            class="lang-btn"
+            aria-pressed="false"
+            aria-label="Switch to Turkish"
+          >
+            TR
+          </button>
+        </nav>
+
+        <!-- Theme Toggle -->
         <button
-          id="btn-lang-en"
-          class="lang-btn active"
-          aria-pressed="true"
-          aria-label="Switch to English"
+          id="btn-theme"
+          class="theme-toggle"
+          aria-label="Toggle Dark/Light Mode"
+          data-en="Toggle Theme"
+          data-tr="Tema Degistir"
+          title="Toggle Theme"
         >
-          EN
+          <i class="fas fa-moon" aria-hidden="true"></i>
         </button>
+
+        <!-- Favorites Toggle -->
         <button
-          id="btn-lang-tr"
-          class="lang-btn"
-          aria-pressed="false"
-          aria-label="Switch to Turkish"
+          id="btn-show-favorites"
+          class="favorites-toggle"
+          aria-label="Show Favorites"
+          data-en="Show Favorites"
+          data-tr="Favorileri Goster"
+          title="Show Favorites"
         >
-          TR
+          <i class="fas fa-heart" aria-hidden="true"></i>
+          <span id="favorites-count" class="favorites-count">0</span>
         </button>
-      </nav>
+      </div>
+
+      <!-- Favorites Panel -->
+      <aside id="favorites-panel" class="favorites-panel" aria-label="Favorite Quotes">
+        <header class="favorites-header">
+          <h2 data-en="Favorite Quotes" data-tr="Favori Alintilar">Favorite Quotes</h2>
+          <button
+            id="btn-close-favorites"
+            class="close-favorites"
+            aria-label="Close Favorites"
+          >
+            <i class="fas fa-times" aria-hidden="true"></i>
+          </button>
+        </header>
+        <div id="favorites-list" class="favorites-list">
+          <p class="empty-favorites" data-en="No favorites yet. Click the heart icon to save quotes!" data-tr="Henuz favori yok. Alintilari kaydetmek icin kalp ikonuna tiklayin!">
+            No favorites yet. Click the heart icon to save quotes!
+          </p>
+        </div>
+      </aside>
 
       <!-- Toast Notification -->
       <div
@@ -177,6 +259,9 @@
           >Copied to clipboard!</span
         >
       </div>
+
+      <!-- Favorites Overlay -->
+      <div id="favorites-overlay" class="favorites-overlay" aria-hidden="true"></div>
     </main>
 
     <!-- API Attribution Footer -->

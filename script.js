@@ -89,7 +89,10 @@ let state = {
     currentAuthor: null,     // Current author name
     currentLanguage: 'en',   // Selected language (en/tr)
     isLoading: false,        // Loading state
-    isSpeaking: false        // Speech state
+    isSpeaking: false,       // Speech state
+    currentTheme: 'dark',    // Current theme (dark/light)
+    favorites: [],           // Favorite quotes array
+    favoritesOpen: false     // Favorites panel state
 };
 
 // =============================================
@@ -102,8 +105,16 @@ const elements = {
     btnTwitter: document.getElementById('btn-twitter'),
     btnCopy: document.getElementById('btn-copy'),
     btnSpeak: document.getElementById('btn-speak'),
+    btnFavorite: document.getElementById('btn-favorite'),
     btnLangEn: document.getElementById('btn-lang-en'),
     btnLangTr: document.getElementById('btn-lang-tr'),
+    btnTheme: document.getElementById('btn-theme'),
+    btnShowFavorites: document.getElementById('btn-show-favorites'),
+    btnCloseFavorites: document.getElementById('btn-close-favorites'),
+    favoritesCount: document.getElementById('favorites-count'),
+    favoritesPanel: document.getElementById('favorites-panel'),
+    favoritesList: document.getElementById('favorites-list'),
+    favoritesOverlay: document.getElementById('favorites-overlay'),
     toast: document.getElementById('toast'),
     toastMessage: document.getElementById('toast-message')
 };
@@ -481,6 +492,9 @@ function displayQuote(text, author) {
     authorName.textContent = author || 'Unknown';
     elements.quoteAuthor.classList.add('fade-in');
     
+    // Update favorite button state
+    updateFavoriteButton();
+    
     // Remove animation classes
     setTimeout(() => {
         elements.quoteText.classList.remove('fade-in');
@@ -766,6 +780,255 @@ function updateLanguageContent(lang) {
 }
 
 // =============================================
+// Favorites Functions
+// =============================================
+
+/**
+ * Loads favorites from localStorage
+ */
+function loadFavorites() {
+    try {
+        const saved = localStorage.getItem('favoriteQuotes');
+        state.favorites = saved ? JSON.parse(saved) : [];
+        updateFavoritesCount();
+        updateFavoriteButton();
+    } catch (error) {
+        console.warn('Failed to load favorites:', error.message);
+        state.favorites = [];
+    }
+}
+
+/**
+ * Saves favorites to localStorage
+ */
+function saveFavorites() {
+    try {
+        localStorage.setItem('favoriteQuotes', JSON.stringify(state.favorites));
+        updateFavoritesCount();
+    } catch (error) {
+        console.warn('Failed to save favorites:', error.message);
+    }
+}
+
+/**
+ * Toggles favorite status for current quote
+ */
+function toggleFavorite() {
+    if (!state.currentQuote) return;
+    
+    const currentQuote = {
+        text: state.currentQuote,
+        author: state.currentAuthor,
+        addedAt: new Date().toISOString()
+    };
+    
+    const index = state.favorites.findIndex(q => q.text === currentQuote.text);
+    
+    if (index === -1) {
+        // Add to favorites
+        state.favorites.unshift(currentQuote);
+        showToastMessage(state.currentLanguage === 'tr' ? 'Favorilere eklendi!' : 'Added to favorites!');
+    } else {
+        // Remove from favorites
+        state.favorites.splice(index, 1);
+        showToastMessage(state.currentLanguage === 'tr' ? 'Favorilerden cikarildi!' : 'Removed from favorites!');
+    }
+    
+    saveFavorites();
+    updateFavoriteButton();
+    renderFavoritesList();
+}
+
+/**
+ * Updates the favorite button state
+ */
+function updateFavoriteButton() {
+    if (!state.currentQuote) return;
+    
+    const isFavorited = state.favorites.some(q => q.text === state.currentQuote);
+    
+    if (isFavorited) {
+        elements.btnFavorite.classList.add('favorited');
+        elements.btnFavorite.innerHTML = '<i class="fas fa-heart" aria-hidden="true"></i>';
+    } else {
+        elements.btnFavorite.classList.remove('favorited');
+        elements.btnFavorite.innerHTML = '<i class="far fa-heart" aria-hidden="true"></i>';
+    }
+}
+
+/**
+ * Updates favorites count badge
+ */
+function updateFavoritesCount() {
+    const count = state.favorites.length;
+    elements.favoritesCount.textContent = count;
+    
+    if (count > 0) {
+        elements.favoritesCount.classList.add('visible');
+    } else {
+        elements.favoritesCount.classList.remove('visible');
+    }
+}
+
+/**
+ * Opens favorites panel
+ */
+function openFavoritesPanel() {
+    state.favoritesOpen = true;
+    elements.favoritesPanel.classList.add('open');
+    elements.favoritesOverlay.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+    renderFavoritesList();
+}
+
+/**
+ * Closes favorites panel
+ */
+function closeFavoritesPanel() {
+    state.favoritesOpen = false;
+    elements.favoritesPanel.classList.remove('open');
+    elements.favoritesOverlay.classList.remove('visible');
+    document.body.style.overflow = '';
+}
+
+/**
+ * Renders the favorites list
+ */
+function renderFavoritesList() {
+    if (state.favorites.length === 0) {
+        const emptyText = state.currentLanguage === 'tr' 
+            ? 'Henuz favori yok. Alintilari kaydetmek icin kalp ikonuna tiklayin!'
+            : 'No favorites yet. Click the heart icon to save quotes!';
+        elements.favoritesList.innerHTML = `<p class="empty-favorites">${emptyText}</p>`;
+        return;
+    }
+    
+    const html = state.favorites.map((quote, index) => `
+        <div class="favorite-item" data-index="${index}">
+            <p class="favorite-item-quote">"${quote.text}"</p>
+            <p class="favorite-item-author">— ${quote.author}</p>
+            <div class="favorite-item-actions">
+                <button class="favorite-item-btn" onclick="copyFavoriteQuote(${index})" title="Copy">
+                    <i class="fas fa-copy"></i>
+                    <span>${state.currentLanguage === 'tr' ? 'Kopyala' : 'Copy'}</span>
+                </button>
+                <button class="favorite-item-btn" onclick="shareFavoriteQuote(${index})" title="Share">
+                    <i class="fab fa-x-twitter"></i>
+                    <span>${state.currentLanguage === 'tr' ? 'Paylas' : 'Share'}</span>
+                </button>
+                <button class="favorite-item-btn delete" onclick="removeFavorite(${index})" title="Delete">
+                    <i class="fas fa-trash"></i>
+                    <span>${state.currentLanguage === 'tr' ? 'Sil' : 'Delete'}</span>
+                </button>
+            </div>
+        </div>
+    `).join('');
+    
+    elements.favoritesList.innerHTML = html;
+}
+
+/**
+ * Copies a favorite quote to clipboard
+ * @param {number} index - Quote index in favorites array
+ */
+async function copyFavoriteQuote(index) {
+    const quote = state.favorites[index];
+    if (!quote) return;
+    
+    const textToCopy = `"${quote.text}" - ${quote.author}`;
+    
+    try {
+        await navigator.clipboard.writeText(textToCopy);
+        showToastMessage(state.currentLanguage === 'tr' ? 'Panoya kopyalandi!' : 'Copied to clipboard!');
+    } catch (error) {
+        console.error('Failed to copy:', error);
+    }
+}
+
+/**
+ * Shares a favorite quote on Twitter
+ * @param {number} index - Quote index in favorites array
+ */
+function shareFavoriteQuote(index) {
+    const quote = state.favorites[index];
+    if (!quote) return;
+    
+    const tweetText = encodeURIComponent(`"${quote.text}" - ${quote.author}`);
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
+    window.open(twitterUrl, '_blank', 'noopener,noreferrer');
+}
+
+/**
+ * Removes a quote from favorites
+ * @param {number} index - Quote index in favorites array
+ */
+function removeFavorite(index) {
+    state.favorites.splice(index, 1);
+    saveFavorites();
+    updateFavoriteButton();
+    renderFavoritesList();
+    showToastMessage(state.currentLanguage === 'tr' ? 'Favorilerden cikarildi!' : 'Removed from favorites!');
+}
+
+// =============================================
+// Theme Functions
+// =============================================
+
+/**
+ * Loads theme preference from localStorage
+ */
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    
+    // Check system preference if no saved theme
+    if (!savedTheme) {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        state.currentTheme = prefersDark ? 'dark' : 'light';
+    } else {
+        state.currentTheme = savedTheme;
+    }
+    
+    applyTheme();
+}
+
+/**
+ * Toggles between dark and light theme
+ */
+function toggleTheme() {
+    state.currentTheme = state.currentTheme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', state.currentTheme);
+    applyTheme();
+}
+
+/**
+ * Applies current theme to document
+ */
+function applyTheme() {
+    document.documentElement.setAttribute('data-theme', state.currentTheme);
+    
+    // Update theme button icon
+    const icon = state.currentTheme === 'dark' ? 'fa-moon' : 'fa-sun';
+    elements.btnTheme.innerHTML = `<i class="fas ${icon}" aria-hidden="true"></i>`;
+    
+    // Update meta theme-color
+    const themeColor = state.currentTheme === 'dark' ? '#252525' : '#f8f9fa';
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', themeColor);
+}
+
+/**
+ * Shows toast with custom message
+ * @param {string} message - Message to display
+ */
+function showToastMessage(message) {
+    elements.toastMessage.textContent = message;
+    elements.toast.classList.add('show');
+    
+    setTimeout(() => {
+        elements.toast.classList.remove('show');
+    }, CONFIG.toastDuration);
+}
+
+// =============================================
 // Event Listeners
 // =============================================
 
@@ -785,9 +1048,20 @@ function initEventListeners() {
     // Text to speech button
     elements.btnSpeak.addEventListener('click', speakQuote);
     
+    // Favorite button
+    elements.btnFavorite.addEventListener('click', toggleFavorite);
+    
     // Language toggle buttons
     elements.btnLangEn.addEventListener('click', () => changeLanguage('en'));
     elements.btnLangTr.addEventListener('click', () => changeLanguage('tr'));
+    
+    // Theme toggle button
+    elements.btnTheme.addEventListener('click', toggleTheme);
+    
+    // Favorites panel buttons
+    elements.btnShowFavorites.addEventListener('click', openFavoritesPanel);
+    elements.btnCloseFavorites.addEventListener('click', closeFavoritesPanel);
+    elements.favoritesOverlay.addEventListener('click', closeFavoritesPanel);
     
     // Keyboard shortcuts
     document.addEventListener('keydown', handleKeyboardShortcuts);
@@ -800,6 +1074,12 @@ function initEventListeners() {
 function handleKeyboardShortcuts(event) {
     // Ignore if typing in input field
     if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+        return;
+    }
+    
+    // Close favorites panel on Escape
+    if (event.key === 'Escape' && state.favoritesOpen) {
+        closeFavoritesPanel();
         return;
     }
     
@@ -820,6 +1100,12 @@ function handleKeyboardShortcuts(event) {
         case 's':
             speakQuote();
             break;
+        case 'f':
+            toggleFavorite();
+            break;
+        case 'd':
+            toggleTheme();
+            break;
     }
 }
 
@@ -831,6 +1117,12 @@ function handleKeyboardShortcuts(event) {
  * Initializes the application
  */
 function init() {
+    // Load saved theme preference
+    loadTheme();
+    
+    // Load saved favorites
+    loadFavorites();
+    
     // Initialize event listeners
     initEventListeners();
     
